@@ -18,3 +18,24 @@ a {
 * {
     box-sizing: border-box;
 }
+
+.spin {
+    border: solid 8px rgb(184, 184, 184);
+    border-bottom-color: rgb(102, 102, 102);
+    border-radius: 50%;
+    height: 100px;
+    width: 100px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: 1.5s linear infinite spinner;
+}
+@keyframes spinner {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}

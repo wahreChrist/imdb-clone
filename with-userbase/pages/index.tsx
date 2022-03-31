@@ -39,6 +39,7 @@ export default function Home(props) {
     const [loginView, setLoginView] = useState<boolean>(true);
     const [search, setSearch] = useState<string>("");
     const [movies, setMovies] = useState<Movie[] | SearchMovie[]>();
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         //change user to props.user after
@@ -49,15 +50,17 @@ export default function Home(props) {
                         "https://imdb-api.com/en/API/MostPopularMovies/k_dh913x3w"
                     );
                     const data = await res.json();
+                    console.log("popular movies data", data);
                     setMovies(data.items);
                 } catch (err) {
                     console.log("error in gettin popular movies", err);
                 }
             })();
         } else if (user && search.length > 0) {
-            let abort = false;
+            let timer;
+            setLoading(true);
 
-            (async () => {
+            const movieFetch = async (): Promise<void> => {
                 try {
                     const res = await fetch(
                         `https://imdb-api.com/en/API/SearchMovie/k_dh913x3w/${search}`
@@ -65,12 +68,16 @@ export default function Home(props) {
                     const data = await res.json();
                     console.log("data object from search query", data);
                     setMovies(data.results);
+                    if (data) {
+                        setLoading(false);
+                    }
                 } catch (err) {
                     console.log("error in gettin popular movies", err);
                 }
-            })();
+            };
+            timer = setTimeout(movieFetch, 500);
             return () => {
-                abort = true;
+                clearTimeout(timer);
             };
         }
     }, [search, user]);
@@ -127,48 +134,53 @@ export default function Home(props) {
         let render: JSX.Element[];
         if (movies && search.length == 0) {
             render = movies.slice(0, 20).map((movie) => (
-                <div
-                    key={movie.id}
-                    className="flex justify-between p-2 items-start hover:bg-galliano/30"
-                >
-                    <div className="flex">
-                        <img
-                            src={movie.image}
-                            alt={movie.title}
-                            className="w-[125px] mr-4"
-                        />
-                        <div className="justify-self-start">
-                            <h3 className="font-semibold">
-                                {movie.title} ({movie.year})
-                            </h3>
-                            <p>Cast: {movie.crew}</p>
+                <Link key={movie.id} passHref href={`/movie/${movie.id}`}>
+                    <div className="flex justify-between p-2 items-start hover:bg-galliano/30 cursor-pointer">
+                        <div className="flex">
+                            <img
+                                src={movie.image}
+                                alt={movie.title}
+                                className="w-[125px] mr-4"
+                            />
+                            <div className="justify-self-start">
+                                <h3 className="font-semibold">
+                                    {movie.title} ({movie.year})
+                                </h3>
+                                <p>Cast: {movie.crew}</p>
+                            </div>
                         </div>
+                        <p className="rounded bg-stone-900/50 p-2 text-galliano font-bold">
+                            {movie.imDbRating || "--"}
+                        </p>
                     </div>
-                    <p className="rounded bg-stone-900/50 p-2 text-galliano font-bold">
-                        {movie.imDbRating || "--"}
-                    </p>
-                </div>
+                </Link>
             ));
-        } else if (movies && search.length > 0) {
+        } else if (movies && search.length > 0 && loading === false) {
             render = movies.map((movie) => (
-                <div
-                    key={movie.id}
-                    className="flex justify-between p-2 items-start hover:bg-galliano/30"
-                >
-                    <div className="flex">
-                        <img
-                            src={movie.image}
-                            alt={movie.title}
-                            className="w-[125px] mr-4"
-                        />
-                        <div className="self-center">
-                            <h3 className="font-semibold">
-                                {movie.title} {movie.description}
-                            </h3>
+                <Link key={movie.id} passHref href={`/movie/${movie.id}`}>
+                    <div className="flex justify-between p-2 items-start hover:bg-galliano/30 cursor-pointer">
+                        <div className="flex">
+                            <img
+                                src={movie.image}
+                                alt={movie.title}
+                                className="w-[125px] mr-4"
+                            />
+                            <div className="self-center">
+                                <h3 className="font-semibold">
+                                    {movie.title} {movie.description}
+                                </h3>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </Link>
             ));
+        } else {
+            render = [
+                <div key="0" className="h-screen text-center">
+                    <div className="spin"></div>
+                    <p className="text-4xl font-semibold">Loading...</p>
+                </div>,
+            ];
         }
         return render;
     };
