@@ -43,20 +43,20 @@ export default function Home(props) {
 
     useEffect(() => {
         //change user to props.user after
-        if (user && search.length == 0) {
+        if (search.length == 0) {
             (async () => {
                 try {
                     const res = await fetch(
                         "https://imdb-api.com/en/API/MostPopularMovies/k_dh913x3w"
                     );
                     const data = await res.json();
-                    console.log("popular movies data", data);
+                    // console.log("popular movies data", data);
                     setMovies(data.items);
                 } catch (err) {
                     console.log("error in gettin popular movies", err);
                 }
             })();
-        } else if (user && search.length > 0) {
+        } else if (search.length > 0) {
             let timer;
             setLoading(true);
 
@@ -66,7 +66,7 @@ export default function Home(props) {
                         `https://imdb-api.com/en/API/SearchMovie/k_dh913x3w/${search}`
                     );
                     const data = await res.json();
-                    console.log("data object from search query", data);
+                    // console.log("data object from search query", data);
                     setMovies(data.results);
                     if (data) {
                         setLoading(false);
@@ -80,7 +80,7 @@ export default function Home(props) {
                 clearTimeout(timer);
             };
         }
-    }, [search, user]);
+    }, [search]);
 
     const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value);
@@ -102,9 +102,9 @@ export default function Home(props) {
             const userPull = await userbase.signIn({
                 username,
                 password,
-                rememberMe: "local",
+                rememberMe: "session",
             });
-            console.log("response from a logged user", userPull);
+            // console.log("response from a logged user", userPull);
             props.setUser(userPull);
         } catch (err) {
             console.log("error in login", err);
@@ -124,6 +124,17 @@ export default function Home(props) {
             props.setUser(userPull);
         } catch (err) {
             console.log("error in login in", err);
+        }
+    };
+
+    const logOut = async (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ): Promise<void> => {
+        try {
+            await userbase.signOut();
+            props.setUser(null);
+        } catch (e) {
+            console.error(e.message);
         }
     };
 
@@ -185,27 +196,32 @@ export default function Home(props) {
         return render;
     };
 
-    if (user) {
+    if (props.user) {
         //change to user.props after
         return (
             <div className="bg-buff h-full">
                 <main>
-                    <header className="bg-black flex">
+                    <header className="bg-black flex justify-between">
                         <img
                             src="/IMDB_svg.png"
                             alt="logo"
                             className="mx-4 w-[150px] self-center justify-self-start"
                         />
-                        <div className="flex justify-center w-full">
-                            <input
-                                className="rounded w-[600px] 2xl:w-[700px] my-8 p-1.5 self-center"
-                                type="text"
-                                placeholder="Search..."
-                                onChange={handleSearch}
-                            ></input>
-                        </div>
+
+                        <input
+                            className="rounded w-[600px] 2xl:w-[700px] my-8 p-1.5 self-center"
+                            type="text"
+                            placeholder="Search..."
+                            onChange={handleSearch}
+                        ></input>
+                        <button
+                            className="font-bold p-1.5 text-black bg-white hover:bg-red-600 hover:text-white self-center rounded mr-4"
+                            onClick={logOut}
+                        >
+                            Log out
+                        </button>
                     </header>
-                    <div className="w-[850px] mx-auto my-2">
+                    <div className="w-[850px] mx-auto my-2 min-h-screen">
                         {resRenderer(movies, search)}
                     </div>
                 </main>
