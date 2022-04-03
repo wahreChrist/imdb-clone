@@ -102,12 +102,16 @@ export default function MovieInfo(props) {
                     await userbase.openDatabase({
                         databaseId: dbRes.databases[0].databaseId,
                         changeHandler: function (items) {
-                            setReviews(items);
+                            items.map((mov) => {
+                                if (mov.item.movieId === query.id) {
+                                    setReviews(items);
+                                }
+                            });
                         },
                     });
                 } catch (err) {
                     console.log(
-                        "error in estaclishing connection to database",
+                        "error in establishing connection to database",
                         err
                     );
                 }
@@ -154,7 +158,7 @@ export default function MovieInfo(props) {
     async function deleteReview(itemId) {
         try {
             await userbase.deleteItem({
-                databaseName: "imdb-clone",
+                databaseName: dbId,
                 itemId,
             });
         } catch (err) {
@@ -261,7 +265,7 @@ export default function MovieInfo(props) {
                                 reviews.map((rev, index) => (
                                     <div
                                         key={index}
-                                        className="rounded-md bg-stone-200/90 shadow-stone-800 text-black shadow-inner min-h-[200px] w-10/12 mx-auto my-4"
+                                        className="rounded-md bg-stone-200/90 shadow-stone-800 text-black shadow-inner min-h-[150px] w-10/12 mx-auto my-4"
                                     >
                                         <div>
                                             <h3 className="border-b-4 border-galliano flex font-semibold py-4 w-11/12 mx-auto text-base">
@@ -313,6 +317,9 @@ export default function MovieInfo(props) {
                     </div>
                 )}
             </div>
+            <footer className="bg-black text-white text-center p-1 text-xs">
+                RedAlert © Copyright 2048
+            </footer>
         </main>
     );
 }

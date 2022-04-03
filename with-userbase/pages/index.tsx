@@ -25,13 +25,13 @@ interface SearchMovie {
     title: string;
 }
 
-let user = {
-    authToken: "be91cadeaa466ba1bd30961f85b8d4a3",
-    creationDate: "2022-03-29T15:44:34.245Z",
-    paymentsMode: "disabled",
-    userId: "f658e507-bef5-47a1-8435-1a5d6117cf61",
-    username: "testuser1",
-};
+interface LocalStorage {
+    creationDate: string;
+    expirationDate: string;
+    sessionId: string;
+    signedIn: boolean;
+    username: string;
+}
 
 export default function Home(props) {
     const [username, setUsername] = useState<string>("");
@@ -42,7 +42,7 @@ export default function Home(props) {
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        //change user to props.user after
+        //check for local storage for a login
         if (search.length == 0) {
             (async () => {
                 try {
@@ -102,7 +102,7 @@ export default function Home(props) {
             const userPull = await userbase.signIn({
                 username,
                 password,
-                rememberMe: "session",
+                rememberMe: "local",
             });
             // console.log("response from a logged user", userPull);
             props.setUser(userPull);
@@ -119,7 +119,7 @@ export default function Home(props) {
             const userPull = await userbase.signUp({
                 username,
                 password,
-                rememberMe: "none",
+                rememberMe: "local",
             });
             props.setUser(userPull);
         } catch (err) {
@@ -196,8 +196,12 @@ export default function Home(props) {
         return render;
     };
 
-    if (props.user) {
-        //change to user.props after
+    let locStore: LocalStorage;
+    if (typeof window !== "undefined") {
+        locStore = JSON.parse(localStorage.getItem("userbaseCurrentSession"));
+    }
+
+    if (props.user && locStore.signedIn) {
         return (
             <div className="bg-buff h-full">
                 <main>
@@ -225,67 +229,93 @@ export default function Home(props) {
                         {resRenderer(movies, search)}
                     </div>
                 </main>
-
-                <footer className="text-red-700"></footer>
             </div>
         );
     } else {
         return (
-            <section className="w-[800px] mx-auto">
-                {loginView ? (
-                    <form className="flex flex-col space-y-4">
-                        <h2>Login</h2>
-                        <input
-                            className="p-1.5 border"
-                            type="text"
-                            placeholder="username"
-                            onChange={handleUsername}
-                        ></input>
-                        <input
-                            className="p-1.5 border"
-                            type="password"
-                            placeholder="password"
-                            onChange={handlePass}
-                        ></input>
-                        <button onClick={loginSubmit}>Login</button>
-                        <p>
-                            Register{" "}
-                            <span
-                                className="text-blue-500 hover:text-red-500 cursor-pointer"
-                                onClick={() => setLoginView((prev) => !prev)}
+            <section className=" bg-black text-white">
+                <div className="w-[400px] mx-auto text-center">
+                    {loginView ? (
+                        <form className="flex flex-col space-y-4">
+                            <img
+                                src="/imdb-icon-png-15.jpg"
+                                alt="Login log"
+                                className="w-full mx-auto pt-4"
+                            />
+                            <h2 className="text-xl font-semibold">Login</h2>
+                            <input
+                                className="p-1.5 rounded text-black"
+                                type="text"
+                                placeholder="username"
+                                onChange={handleUsername}
+                            ></input>
+                            <input
+                                className="p-1.5 rounded text-black"
+                                type="password"
+                                placeholder="password"
+                                onChange={handlePass}
+                            ></input>
+                            <button
+                                onClick={loginSubmit}
+                                className="bg-galliano p-1.5 px-6 font-bold rounded-md text-black hover:text-white hover:shadow-lg hover:shadow-galliano/50 self-center"
                             >
-                                here{" "}
-                            </span>
-                            if you doesnt have an account
-                        </p>
-                    </form>
-                ) : (
-                    <form className="flex flex-col space-y-4">
-                        <h2>Register</h2>
-                        <input
-                            className="p-1.5 border"
-                            type="text"
-                            placeholder="username"
-                            onChange={handleUsername}
-                        ></input>
-                        <input
-                            className="p-1.5 border"
-                            type="password"
-                            placeholder="password"
-                            onChange={handlePass}
-                        ></input>
-                        <button onClick={loginRegister}>Register</button>
-                        <p>
-                            Login{" "}
-                            <span
-                                className="text-blue-500 hover:text-red-500 cursor-pointer"
-                                onClick={() => setLoginView((prev) => !prev)}
+                                Login
+                            </button>
+                            <p className="pb-4">
+                                Register{" "}
+                                <span
+                                    className="text-buff hover:text-red-500 cursor-pointer"
+                                    onClick={() =>
+                                        setLoginView((prev) => !prev)
+                                    }
+                                >
+                                    here{" "}
+                                </span>
+                                if you doesnt have an account
+                            </p>
+                        </form>
+                    ) : (
+                        <form className="flex flex-col space-y-4">
+                            <img
+                                src="/imdb-icon-png-15.jpg"
+                                alt="Login log"
+                                className="w-full mx-auto pt-4"
+                            />
+                            <h2 className="text-xl font-semibold">
+                                Register a new user:
+                            </h2>
+                            <input
+                                className="p-1.5 rounded text-black"
+                                type="text"
+                                placeholder="username"
+                                onChange={handleUsername}
+                            ></input>
+                            <input
+                                className="p-1.5 rounded text-black"
+                                type="password"
+                                placeholder="password"
+                                onChange={handlePass}
+                            ></input>
+                            <button
+                                onClick={loginRegister}
+                                className="bg-galliano p-1.5 px-6 font-bold rounded-md text-black hover:text-white hover:shadow-lg hover:shadow-galliano/50 self-center"
                             >
-                                here
-                            </span>
-                        </p>
-                    </form>
-                )}
+                                Sign Up
+                            </button>
+                            <p>
+                                Login{" "}
+                                <span
+                                    className="text-buff hover:text-red-500 cursor-pointer"
+                                    onClick={() =>
+                                        setLoginView((prev) => !prev)
+                                    }
+                                >
+                                    here
+                                </span>
+                            </p>
+                        </form>
+                    )}
+                </div>
             </section>
         );
     }

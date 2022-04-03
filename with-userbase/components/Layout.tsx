@@ -25,7 +25,6 @@ export default function Layout({
                 <meta name="peronal IMDB clone" content="movie api" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            {/* navbar? */}
             {children}
         </div>
     );
