@@ -1,12 +1,13 @@
 import React from "react";
 import Head from "next/head";
 
-interface User {
+interface UserData {
     authToken: string;
     creationDate: string;
-    paymentsMode: string;
+    paymentsMode?: string;
     userId: string;
     username: string;
+    sessionId?: string;
 }
 
 export default function Layout({
@@ -14,8 +15,8 @@ export default function Layout({
     setUser,
     children,
 }: {
-    user: User;
-    setUser: React.Dispatch<React.SetStateAction<User>>;
+    user: UserData;
+    setUser: React.Dispatch<React.SetStateAction<UserData>>;
     children: JSX.Element;
 }) {
     return (

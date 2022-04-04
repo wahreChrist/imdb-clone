@@ -50,25 +50,29 @@ export default function MovieInfo(props) {
     const [dbId, setDbId] = useState<string>("");
 
     useEffect(() => {
-        if (!props.user) {
-            push("/");
-        } else if (props.user.username == "testuser1") {
+        console.log(props);
+        if (props.user?.username == "testuser1") {
             const openDatabase = async () => {
                 try {
-                    console.log("opening db...");
-                    console.log(reviews);
                     // const dbRes = await userbase.getDatabases();
                     // console.log("response from getDb", dbRes);
+
+                    // setDbId(dbRes.databases[0].databaseId);
+
                     await userbase.openDatabase({
                         databaseName: "imdb-clone",
                         changeHandler: function (items) {
                             console.log(items);
-                            console.log(items[0].item.movieId);
-                            items.map((mov) => {
-                                if (mov.item.movieId === query.id) {
-                                    setReviews(items);
+                            // console.log(items[0].item.movieId);
+                            let arr = [];
+                            items.forEach((mov) => {
+                                console.log("mov object:", mov);
+                                if (mov.item.movieId == query.id) {
+                                    arr.push(mov.item);
                                 }
                             });
+                            // console.log("arr state", arr);
+                            arr.length > 0 && setReviews(arr);
                         },
                     });
                 } catch (err) {
@@ -92,16 +96,44 @@ export default function MovieInfo(props) {
                     console.log("error in sharing dbs", err);
                 }
             })();
-        } else {
+        } else if (props.user?.username == "testuser3") {
             const openDatabase = async () => {
                 try {
-                    console.log("opening db...");
                     const dbRes = await userbase.getDatabases();
                     console.log("response from getDb", dbRes);
+
                     setDbId(dbRes.databases[0].databaseId);
                     await userbase.openDatabase({
                         databaseId: dbRes.databases[0].databaseId,
                         changeHandler: function (items) {
+                            let arr = [];
+                            items.forEach((mov) => {
+                                console.log("mov object:", mov);
+                                if (mov.item.movieId == query.id) {
+                                    arr.push(mov.item);
+                                }
+                            });
+                            // console.log("arr state", arr);
+                            arr.length > 0 && setReviews(arr);
+                        },
+                    });
+                } catch (err) {
+                    console.log(
+                        "error in establishing connection to database",
+                        err
+                    );
+                }
+            };
+            openDatabase();
+        } else {
+            const openDatabase = async () => {
+                try {
+                    console.log("opening db...");
+
+                    await userbase.openDatabase({
+                        databaseName: "imdb-clone",
+                        changeHandler: function (items) {
+                            console.log("new DB:", items);
                             items.map((mov) => {
                                 if (mov.item.movieId === query.id) {
                                     setReviews(items);
@@ -127,28 +159,47 @@ export default function MovieInfo(props) {
             // console.log(data);
             setMovieData([data]);
         })();
-    }, []);
+    }, [query]);
 
     async function addReview(
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ): Promise<void> {
         e.preventDefault();
         try {
-            await userbase.insertItem({
-                databaseId: dbId,
-                item: {
-                    name: props.username,
-                    timestamp: new Date().toLocaleDateString("en-UK", {
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric",
-                    }),
-                    movieId: movieData[0].id,
-                    text: reviewText,
-                },
-            });
-            setReviewDisplay(false);
-            setReviewText("");
+            if (dbId !== "") {
+                await userbase.insertItem({
+                    databaseId: dbId,
+                    item: {
+                        name: props.user.username,
+                        timestamp: new Date().toLocaleDateString("en-UK", {
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                        }),
+                        movieId: movieData[0].id,
+                        text: reviewText,
+                    },
+                });
+                setReviewDisplay(false);
+                setReviewText("");
+            } else {
+                await userbase.insertItem({
+                    databaseName: "imdb-clone",
+                    item: {
+                        name: props.user.username,
+                        timestamp: new Date().toLocaleDateString("en-UK", {
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                        }),
+                        movieId: movieData[0].id,
+                        text: reviewText,
+                    },
+                });
+                setReviewDisplay(false);
+                setReviewText("");
+            }
+
             // setReviews(reviews => [...reviews, item])
         } catch (err) {
             console.log("error in adding review", err);
@@ -172,6 +223,7 @@ export default function MovieInfo(props) {
         try {
             await userbase.signOut();
             props.setUser(null);
+            localStorage.removeItem("userbaseCurrentSession");
             push("/");
         } catch (e) {
             console.error(e.message);
@@ -241,7 +293,7 @@ export default function MovieInfo(props) {
                                             setReviewDisplay((prev) => !prev)
                                         }
                                     >
-                                        Review
+                                        Leave a review
                                     </button>
                                 </div>
                             </div>
@@ -269,11 +321,10 @@ export default function MovieInfo(props) {
                                     >
                                         <div>
                                             <h3 className="border-b-4 border-galliano flex font-semibold py-4 w-11/12 mx-auto text-base">
-                                                {rev.createdBy.username}{" "}
-                                                {rev.item.timestamp}
+                                                {rev.name} {rev.timestamp}
                                             </h3>
                                             <p className="w-11/12 my-4 mx-auto text-base">
-                                                {rev.item.text}
+                                                {rev.text}
                                             </p>
                                         </div>
                                     </div>
@@ -282,25 +333,34 @@ export default function MovieInfo(props) {
                                 <h3 className="border-l-4 border-galliano p-2 text-lg">
                                     Similar movies:
                                 </h3>
-                                <div className="flex space-x-8 max-w-[800px]">
+                                <div className="flex space-x-8 w-[850px]">
                                     {mov.similars?.length &&
                                         mov.similars
                                             .slice(0, 4)
                                             .map((suggestion) => (
                                                 <div
                                                     key={suggestion.id}
-                                                    className="bg-stone-200 rounded-b-md drop-shadow-xl shadow-inner shadow-stone-800 w-[175px] mt-4 mb-6"
+                                                    className="mt-4 mb-6 border-double border-4 border-buff hover:text-white hover:cursor-pointer text-galliano w-[190px]"
                                                 >
-                                                    <img
-                                                        src={suggestion.image}
-                                                        alt={suggestion.title}
-                                                        className="w-full object-cover h-[245px]"
-                                                    />
                                                     <Link
                                                         passHref
                                                         href={`/movie/${suggestion.id}`}
                                                     >
-                                                        <p className="text-center font-medium justify-self-center p-2 text-[#063BDB] cursor-pointer hover:text-galliano">
+                                                        <img
+                                                            src={
+                                                                suggestion.image
+                                                            }
+                                                            alt={
+                                                                suggestion.title
+                                                            }
+                                                            className="object-cover h-[245px] p-4 pb-0"
+                                                        />
+                                                    </Link>
+                                                    <Link
+                                                        passHref
+                                                        href={`/movie/${suggestion.id}`}
+                                                    >
+                                                        <p className="text-center font-medium text-sm justify-self-center p-2 text-inherit cursor-pointer ">
                                                             {suggestion.title}
                                                         </p>
                                                     </Link>

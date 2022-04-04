@@ -41,7 +41,11 @@ export default function Home(props) {
     const [movies, setMovies] = useState<Movie[] | SearchMovie[]>();
     const [loading, setLoading] = useState<boolean>(false);
 
+    const user = props.user;
+
     useEffect(() => {
+        console.log("props:", props);
+
         //check for local storage for a login
         if (search.length == 0) {
             (async () => {
@@ -80,7 +84,7 @@ export default function Home(props) {
                 clearTimeout(timer);
             };
         }
-    }, [search]);
+    }, [search, user]);
 
     const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value);
@@ -133,6 +137,7 @@ export default function Home(props) {
         try {
             await userbase.signOut();
             props.setUser(null);
+            localStorage.removeItem("userbaseCurrentSession");
         } catch (e) {
             console.error(e.message);
         }
@@ -196,12 +201,23 @@ export default function Home(props) {
         return render;
     };
 
-    let locStore: LocalStorage;
-    if (typeof window !== "undefined") {
-        locStore = JSON.parse(localStorage.getItem("userbaseCurrentSession"));
-    }
+    // prop.user
+    // authToken: "3d601f18864b82623d0b9d520215f49b";
+    // creationDate: "2022-04-02T01:25:14.537Z";
+    // paymentsMode: "disabled";
+    // userId: "90298c70-1f88-41fe-a633-4de33407de90";
+    // username: "testuser3";
 
-    if (props.user && locStore.signedIn) {
+    // let locStore: LocalStorage;
+    // if (typeof window !== "undefined") {
+    //     locStore = JSON.parse(localStorage.getItem("userbaseCurrentSession"));
+    //     if (!props.user && locStore) {
+    //         props.setUser(locStore);
+    //         console.log("props.user after localstorage", props.user);
+    //     }
+    // }
+
+    if (props.user?.userId) {
         return (
             <div className="bg-buff h-full">
                 <main>
