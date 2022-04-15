@@ -201,22 +201,6 @@ export default function Home(props) {
         return render;
     };
 
-    // prop.user
-    // authToken: "3d601f18864b82623d0b9d520215f49b";
-    // creationDate: "2022-04-02T01:25:14.537Z";
-    // paymentsMode: "disabled";
-    // userId: "90298c70-1f88-41fe-a633-4de33407de90";
-    // username: "testuser3";
-
-    // let locStore: LocalStorage;
-    // if (typeof window !== "undefined") {
-    //     locStore = JSON.parse(localStorage.getItem("userbaseCurrentSession"));
-    //     if (!props.user && locStore) {
-    //         props.setUser(locStore);
-    //         console.log("props.user after localstorage", props.user);
-    //     }
-    // }
-
     if (props.user?.userId) {
         return (
             <div className="bg-buff h-full">
@@ -249,7 +233,7 @@ export default function Home(props) {
         );
     } else {
         return (
-            <section className=" bg-black text-white">
+            <section className=" bg-black text-white min-h-screen">
                 <div className="w-[400px] mx-auto text-center">
                     {loginView ? (
                         <form className="flex flex-col space-y-4">

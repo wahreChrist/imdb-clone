@@ -54,16 +54,10 @@ export default function MovieInfo(props) {
         if (props.user?.username == "testuser1") {
             const openDatabase = async () => {
                 try {
-                    // const dbRes = await userbase.getDatabases();
-                    // console.log("response from getDb", dbRes);
-
-                    // setDbId(dbRes.databases[0].databaseId);
-
                     await userbase.openDatabase({
                         databaseName: "imdb-clone",
                         changeHandler: function (items) {
                             console.log(items);
-                            // console.log(items[0].item.movieId);
                             let arr = [];
                             items.forEach((mov) => {
                                 console.log("mov object:", mov);
@@ -71,7 +65,6 @@ export default function MovieInfo(props) {
                                     arr.push(mov.item);
                                 }
                             });
-                            // console.log("arr state", arr);
                             arr.length > 0 && setReviews(arr);
                         },
                     });
@@ -113,7 +106,6 @@ export default function MovieInfo(props) {
                                     arr.push(mov.item);
                                 }
                             });
-                            // console.log("arr state", arr);
                             arr.length > 0 && setReviews(arr);
                         },
                     });
@@ -133,12 +125,14 @@ export default function MovieInfo(props) {
                     await userbase.openDatabase({
                         databaseName: "imdb-clone",
                         changeHandler: function (items) {
-                            console.log("new DB:", items);
-                            items.map((mov) => {
-                                if (mov.item.movieId === query.id) {
-                                    setReviews(items);
+                            let arr = [];
+                            items.forEach((mov) => {
+                                console.log("mov object:", mov);
+                                if (mov.item.movieId == query.id) {
+                                    arr.push(mov.item);
                                 }
                             });
+                            arr.length > 0 && setReviews(arr);
                         },
                     });
                 } catch (err) {
