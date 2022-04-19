@@ -233,8 +233,8 @@ export default function Home(props) {
         );
     } else {
         return (
-            <section className=" bg-black text-white min-h-screen">
-                <div className="w-[400px] mx-auto text-center">
+            <section className=" bg-black text-white min-h-screen flex items-center">
+                <div className="w-[400px] mx-auto text-center ">
                     {loginView ? (
                         <form className="flex flex-col space-y-4">
                             <img
