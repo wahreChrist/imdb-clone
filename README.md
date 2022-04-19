@@ -14,7 +14,7 @@ Personal IMDB clone project built on NextJS/TailwindCSS with the use of external
 
 ### Techstack <br>
 
-![next](https://img.shields.io/static/v1?style=flat-square&label=+&logo=nextdotjs&message=NextJS&color=black)
-![tailwind](https://img.shields.io/static/v1?style=flat-square&label=+&logo=tailwindcss&message=Tailwind&color=white)
-![typescript](https://img.shields.io/static/v1?style=flat-square&label=+&logo=typescript&message=Typescript&color=white)
-![userbase](https://img.shields.io/static/v1?style=flat-square&label=+&message=Userbase&color=yellow)
+![typescript](https://img.shields.io/static/v1?style=flat-square&label=+&logo=typescript&message=Typescript&color=white) 
+![next](https://img.shields.io/static/v1?style=flat-square&label=+&logo=nextdotjs&message=NextJS&color=black) 
+![tailwind](https://img.shields.io/static/v1?style=flat-square&label=+&logo=tailwindcss&message=Tailwind&color=white) 
+![userbase](https://img.shields.io/static/v1?style=flat-square&label=+&message=Userbase&color=yellow) 
